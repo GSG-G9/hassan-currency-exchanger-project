@@ -1,0 +1,29 @@
+.header-nav {
+	padding: 1rem 0;
+	width: 100%;
+	position: relative;
+	top: 0;
+	left: 0;
+	display: flex;
+	justify-content: space-around;
+	align-items: center;
+	box-shadow: 0px 1px 2px rgb(227, 227, 230);
+}
+
+.header-menus {
+	width: 30%;
+	color: rgb(255, 255, 255);
+	display: inline;
+	display: flex;
+	justify-content: space-around;
+	list-style-type: none;
+	user-select: none;
+}
+
+.logo-button {
+	outline: 0;
+	border: none;
+	outline: none;
+	background-color: transparent;
+	cursor: pointer;
+}
