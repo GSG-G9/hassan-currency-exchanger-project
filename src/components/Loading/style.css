@@ -3,9 +3,8 @@
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	min-height: 100vh;
 	animation: animateBg 10s linear infinite;
-	top: 100px;
+	top: 60%;
 }
 
 @keyframes animateBg {
