@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../Header';
 import Loading from '../Loading';
 import './style.css';
@@ -48,6 +48,44 @@ export default function Main() {
 	const [loading, setLoading] = useState(false);
 	const [currenciesCache, setCurrenciesCache] = useState({});
 	const [error, setError] = useState('');
+	const [newClick, setNewClick] = useState(false);
+
+	const handleRequest = useCallback(async () => {
+		try {
+			const controller = new AbortController();
+			const { signal } = controller;
+			const res = await fetch(
+				`https://api.exchangeratesapi.io/latest?base=${fromCurrency}`,
+				{
+					signal,
+				}
+			);
+			const { rates } = await res.json();
+			setCurrenciesCache((data) => ({
+				...data,
+				[fromCurrency]: { rates, dateTime: Date.now() },
+			}));
+			setNewRequest(true);
+			setLoading(false);
+			setResult((rates[toCurrency] * +value).toFixed(3));
+
+			return controller;
+		} catch (e) {
+			setError('Failed To Fetch, Please Try again later ...');
+		}
+	}, [fromCurrency, toCurrency, value]);
+
+	useEffect(() => {
+		if (newClick) {
+			let controller;
+			(async () => {
+				controller = await handleRequest();
+			})();
+			return () => {
+				controller.abort();
+			};
+		}
+	}, [newClick, handleRequest]);
 
 	const handleClick = () => {
 		if (isNaN(value)) {
@@ -68,20 +106,7 @@ export default function Main() {
 			);
 		}
 
-		return fetch(`https://api.exchangeratesapi.io/latest?base=${fromCurrency}`)
-			.then((res) => res.json())
-			.then(({ rates }) => {
-				setCurrenciesCache((data) => ({
-					...data,
-					[fromCurrency]: { rates, dateTime: Date.now() },
-				}));
-				setNewRequest(true);
-				setLoading(false);
-				return setResult((rates[toCurrency] * +value).toFixed(3));
-			})
-			.catch(() => {
-				setError('Failed To Fetch, Please Try again later ...');
-			});
+		return setNewClick(true);
 	};
 
 	const swapCurrency = () => {
@@ -112,6 +137,7 @@ export default function Main() {
 								className='currency-input-text'
 								value={value}
 								onChange={({ target: { value } }) => {
+									setNewClick(false);
 									setNewRequest(false);
 									setValue(value);
 								}}
@@ -123,6 +149,7 @@ export default function Main() {
 								className='currency-select'
 								value={fromCurrency}
 								onChange={(e) => {
+									setNewClick(false);
 									setNewRequest(false);
 									setFromCurrency(e.target.value);
 								}}
@@ -155,6 +182,7 @@ export default function Main() {
 								className='currency-select'
 								value={toCurrency}
 								onChange={(e) => {
+									setNewClick(false);
 									setNewRequest(false);
 									setToCurrency(e.target.value);
 								}}
