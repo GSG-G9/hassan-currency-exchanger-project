@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../Header';
 import Loading from '../Loading';
 import './style.css';
@@ -77,7 +77,10 @@ export default function Main() {
 
 	useEffect(() => {
 		if (newClick) {
-			const controller = handleRequest();
+			let controller;
+			(async () => {
+				controller = await handleRequest();
+			})();
 			return () => {
 				controller.abort();
 			};
@@ -102,7 +105,8 @@ export default function Main() {
 				(currenciesCache[fromCurrency].rates[toCurrency] * +value).toFixed(3)
 			);
 		}
-		return setNewClick(!newClick);
+
+		return setNewClick(true);
 	};
 
 	const swapCurrency = () => {
@@ -133,6 +137,7 @@ export default function Main() {
 								className='currency-input-text'
 								value={value}
 								onChange={({ target: { value } }) => {
+									setNewClick(false);
 									setNewRequest(false);
 									setValue(value);
 								}}
@@ -144,6 +149,7 @@ export default function Main() {
 								className='currency-select'
 								value={fromCurrency}
 								onChange={(e) => {
+									setNewClick(false);
 									setNewRequest(false);
 									setFromCurrency(e.target.value);
 								}}
@@ -176,6 +182,7 @@ export default function Main() {
 								className='currency-select'
 								value={toCurrency}
 								onChange={(e) => {
+									setNewClick(false);
 									setNewRequest(false);
 									setToCurrency(e.target.value);
 								}}
